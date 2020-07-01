@@ -1,4 +1,18 @@
 # TRABAJO-PRACTICO-2
+
+Trabajo Práctico Integrador 
+
+Algoritmos I 75.40  :: FIUBA ::   Cátedra Costa
+
+Integrantes:
+
+-Ernesto Lucas Monfort
+
+-Manuel Dieguez
+
+-Gabriel Katta
+
+
 1- Conexión con los servicios del SNM (ver listado adjunto) 
 
 2- Listado de las alertas que se originen en la geolocalización actual o una geolocalización ingresada por el usuario (lat-long) 
