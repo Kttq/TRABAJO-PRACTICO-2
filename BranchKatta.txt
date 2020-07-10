@@ -1,1 +1,3 @@
 Aqui documentare lo que hago a lo largo del TP -Gabriel Katta
+
+10/7/2020 -- Menu y funciones basicas de URLS con JSON
