@@ -1,1 +1,4 @@
-Updates: 
+Updates:
+
+Creo mainCsv y listo en diccionarios los indices de weatherdata.csv
+
