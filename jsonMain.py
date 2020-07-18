@@ -20,7 +20,7 @@ def formatoAlertas(url):
                   "Zonas": list(item["zones"].values())}
         nuevaAlertas.append(alerta)
     return nuevaAlertas
-​
+
 def pronosticoCiudad(url, ciudad):
     pronosticoDiario = urlaLista(url)
     dictPronostico = {}
