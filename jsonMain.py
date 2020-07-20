@@ -25,10 +25,16 @@ def pronosticoCiudad(url, ciudad):
     pronosticoDiario = urlaLista(url)
     dictPronostico = {}
     for item in pronosticoDiario:
-         if item["name"].lower() == ciudad.lower():
-             dictPronostico[item["province"]] = {"Dia": item["weather"]["day"],
+        if item["name"].lower() == ciudad.lower():
+            dictPronostico[item["province"]] = {"Dia": item["weather"]["day"],
                                                  "Mañana": {"Temperatura": item["weather"]["morning_temp"],
                                                             "Descripción": item["weather"]["morning_desc"]},
                                                  "Tarde": {"Temperatura": item["weather"]["afternoon_temp"],
                                                            "Descripción": item["weather"]["afternoon_desc"]}}           
     return dictPronostico
+
+def obtenerCoords(url):
+    listaUbicacion = urlaLista(url)
+    coords = {"Latitud": listaUbicacion["results"][0]["geometry"]["location"]["lat"], "Longitud":listaUbicacion["results"][0]["geometry"]["location"]["lng"]}
+    return coords
+    
