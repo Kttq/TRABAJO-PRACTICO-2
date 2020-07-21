@@ -1,1 +1,3 @@
 En este archivo se irán añadiendo los cambios realizados por Ernesto Monfort
+
+10/07/2020 Agrego una función para listar alertas, y una para obtener el pronóstico de una ciudad
