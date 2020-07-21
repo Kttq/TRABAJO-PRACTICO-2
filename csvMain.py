@@ -32,7 +32,7 @@ def filtroAnio(lista):
     tempmax= [[],[],[],[],[]]
     tempmin= [[],[],[],[],[]]
     humedad = [[],[],[],[],[]]
-    
+    precipitaciones = [[],[],[],[],[]]
     
     for i in lista:
         
@@ -40,31 +40,37 @@ def filtroAnio(lista):
             tempmax[0].append(float(i["Max t"]))
             tempmin[0].append(float(i["Min t"]))
             humedad[0].append(float(i["Humedad"]))
+            precipitaciones[0].append(float(i["Precipitaciones"]))
         
         elif i["Fecha"][5:9] == "2016":
             tempmax[1].append(float(i["Max t"]))
             tempmin[1].append(float(i["Min t"]))
             humedad[1].append(float(i["Humedad"]))
-        
+            precipitaciones[1].append(float(i["Precipitaciones"]))
+
+
         elif i["Fecha"][5:9] == "2017":
             tempmax[2].append(float(i["Max t"]))
             tempmin[2].append(float(i["Min t"]))
             humedad[2].append(float(i["Humedad"]))
-        
+            precipitaciones[2].append(float(i["Precipitaciones"]))
+
         elif i["Fecha"][5:9] == "2018":
             tempmax[3].append(float(i["Max t"]))
             tempmin[3].append(float(i["Min t"]))
             humedad[3].append(float(i["Humedad"]))
-        
+            precipitaciones[3].append(float(i["Precipitaciones"]))
+
         elif i["Fecha"][5:9] == "2019":
             tempmax[4].append(float(i["Max t"]))
             tempmin[4].append(float(i["Min t"]))
             humedad[4].append(float(i["Humedad"]))
-       
+            precipitaciones[4].append(float(i["Precipitaciones"]))
+
         else:
             print("Error")
 
-    data = [tempmax,tempmin,humedad]
+    data = [tempmax,tempmin,humedad, precipitaciones]
     
     return data
 
@@ -98,8 +104,8 @@ def main():
     lista = csvaLista()
     data = filtroAnio(lista)
     promedios = calcularPromedios(data)
-    menu = input("1 2 3")
-
+    print("1) Grafico promedio de temperaturas por año.\n2) Grafico promedio de humedad por año.")
+    menu = input("3) Milímetros máximos de lluvia de los últimos 5 años.\n4) Temperatura máxima de los últimos 5 años. \n")
     if menu == "1":
         y = promedios[0]
         x = [2015, 2016, 2017, 2018, 2019]
@@ -124,9 +130,24 @@ def main():
         plt.ylabel("Humedad relativa (fraccion)")
         plt.title("Promedio de humedad por año")
         plt.show()
-
+    
+    
     elif menu == "3":
-        pass
-
-
+        maxLluviaAnual = []
+        
+        for año in range(5):
+            maxLluviaAnual.append(max(data[3][año]))
+        
+        for i in reversed(maxLluviaAnual):
+            print(i)
+    
+    elif menu == "4":
+        maxTempAnual = []
+        
+        for año in range(5):
+            maxTempAnual.append(max(data[0][año]))
+        
+        for i in reversed(maxTempAnual):
+            print(i)
+    
 main()
