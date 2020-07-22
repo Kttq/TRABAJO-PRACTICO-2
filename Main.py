@@ -59,14 +59,14 @@ def mostrarAlertas(listaAlertas):
         Pos: Muestra en orden los componentes de cada alerta"""
     if len(listaAlertas) != 0:
         i = 0
-        print("Las alertas encontradas son...")
+        print("\nLas alertas encontradas son...")
         for alerta in listaAlertas:
             print(f"\nALERTA #{i+1}\n")
             for atributo in alerta:
                 print(atributo,":",alerta[atributo])
             i += 1
     else:
-        print("No hay alertas para mostrar...")    
+        print("\nNo hay alertas para mostrar...")    
 
 def listaCoords(listaAlertas):  #Preguntar maneras de como reducir tiempo de espera.
     """ Funcion que transforma una lista de zonas en coordenadas
@@ -98,7 +98,7 @@ def calculoDistancia(coordAlertas,coordUsuario,alertas):
             alertaCoord = (coordenada["Latitud"],coordenada["Longitud"])
             distancia = round((distance.distance(coordUsuario,alertaCoord).km),5)
             if distancia <= radioMin:
-                print(f"Alerta encontrada a {distancia}Km !!!\n")
+                print(f"Alerta encontrada a {distancia}Km !!!")
                 indice = coordAlertas.index(alerta) #Consigo en cual alerta esta dicha coordenada.
                 lista.append(alertas[indice]) #Muestro la alerta encontrada
     mostrarAlertas(lista)
@@ -172,35 +172,6 @@ def pronosticoExtendido():
             coordenadasCiudad = listaPronosticos[0][0]["Coord"]
             calculoDistancia(coordenadas,coordenadasCiudad,alertas)
 
-def menuGraficos():
-    bandera = True
-    Seleccion = ""
-    while bandera:
-        print("\n--------------- G R A F I C O S ---------------\n")
-        print("[1] Promedio de temperaturas anuales de los últimos 5 años \n[2] Promedio de humedad de los últimos 5 años")
-        print("[3] Milímetros máximos de lluvia de los últimos 5 años \n[4] Temperatura máxima de los últimos 5 años\n[5] Salir\n")
-        print("-----------------------------------------------")
-
-        Seleccion = input("\nSelecciona una opcion (1-2-3-4-5): ")
-        while Seleccion not in ["1","2","3","4","5"]:
-            Seleccion = input("\nSelecciona una opcion VALIDA (1-2-3-4-5): ")
-
-        if Seleccion == "1":
-            print("Nada")
-               
-        elif Seleccion == "2":
-            print("Nada")
-
-        elif Seleccion == "3":
-            print("Nada")
-
-        elif Seleccion == "4":
-            print("Nada")
-            
-        elif Seleccion == "5":
-            print("Nada")
-            bandera = False
-
 def main():
     bandera = True
     Seleccion = ""
@@ -222,7 +193,7 @@ def main():
             mostrarAlertas(alertas)
 
         elif Seleccion == "3":
-            menuGraficos()
+            print("Nada")
 
         elif Seleccion == "4":
             pronosticoExtendido()
