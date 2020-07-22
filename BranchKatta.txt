@@ -1,3 +1,5 @@
 Aqui documentare lo que hago a lo largo del TP -Gabriel Katta
 
 10/7/2020 -- Menu y funciones basicas de URLS con JSON
+19/7/2020 -- Añadi funcionalidad que permite al usuario ingresar sus coordenadas y determinar si hay una alerta en dichas coordenadas.
+21/7/2020 -- Añadi pronosticos extendidos por ciudad, y chequeo de alertas en dicha ciudad
