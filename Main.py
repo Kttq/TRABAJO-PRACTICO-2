@@ -1,6 +1,6 @@
 import jsonMain
-from geopy import distance
-from unidecode import unidecode
+from geopy import distance #Sirve para calcular distancia entre coordenadas.
+from unidecode import unidecode #Sirve para eliminar errores en URLs por caracteres especiales.
 
 #URL DEL SNM
 URL_ALERTAS = "https://ws.smn.gob.ar/alerts/type/AL"
@@ -38,21 +38,6 @@ def floatCheck(x,y):
             x = input("Ingrese el primer valor: ")
             y = input("Ingrese el segundo valor: ")
 
-def mostrarAlertas(listaAlertas):
-    """ Procedimiento que recibe una lista de diccionarios y muestra de manera ordenada sus datos
-        Pre: Necesita que le pasen una lista
-        Pos: Muestra en orden los componentes de cada alerta"""
-    if len(listaAlertas) != 0:
-        i = 0
-        print("Las alertas encontradas son...")
-        for alerta in listaAlertas:
-            print(f"\nALERTA #{i+1}\n")
-            for atributo in alerta:
-                print(atributo,":",alerta[atributo])
-            i += 1
-    else:
-        print("No hay alertas para mostrar...")
-
 def latlongInput():
     """ Funcion que se asegura que un par de strings ingresados sean validas coordenadas
         Pre: no requiere un dato pasado
@@ -66,7 +51,22 @@ def latlongInput():
         if (lat >= -90 and lat <= 90) and (lon >= -180 and lon <= 180) == True:
             return lat,lon
         else:
-            print("\nCoordenadas fuera de rango...")    
+            print("\nCoordenadas fuera de rango...")
+
+def mostrarAlertas(listaAlertas):
+    """ Procedimiento que recibe una lista de diccionarios y muestra de manera ordenada sus datos
+        Pre: Necesita que le pasen una lista
+        Pos: Muestra en orden los componentes de cada alerta"""
+    if len(listaAlertas) != 0:
+        i = 0
+        print("Las alertas encontradas son...")
+        for alerta in listaAlertas:
+            print(f"\nALERTA #{i+1}\n")
+            for atributo in alerta:
+                print(atributo,":",alerta[atributo])
+            i += 1
+    else:
+        print("No hay alertas para mostrar...")    
 
 def listaCoords(listaAlertas):  #Preguntar maneras de como reducir tiempo de espera.
     """ Funcion que transforma una lista de zonas en coordenadas
@@ -121,7 +121,7 @@ def buscarPronosticos(ciudad,links):
         return []
 
     elif len(lista) > 1:
-        print("Multiples resultados encontrados..")
+        print("\nMultiples resultados encontrados..")
         print(f"\nProvincias")
         for item in lista:
             print(f"{lista.index(item)+1}) "+item[1].upper())
@@ -158,7 +158,7 @@ def mostrarPronosticos(listaPronosticos):
 
 def pronosticoExtendido():
     """Funcion 'Maestra' de pronosticos extendidos, recopila y ejecuta todas las funciones relacionadas con pronosticos."""
-    ciudad = input("\nIngrese la ciudad a buscar: ").lower()
+    ciudad = input("\nIngrese la ciudad a buscar (recuerda usar acentos): ").lower()  
     listaPronosticos = buscarPronosticos(ciudad,URL_PRONOSTICO)
     mostrarPronosticos(listaPronosticos)
     if listaPronosticos != []:
@@ -173,7 +173,33 @@ def pronosticoExtendido():
             calculoDistancia(coordenadas,coordenadasCiudad,alertas)
 
 def menuGraficos():
-    print()
+    bandera = True
+    Seleccion = ""
+    while bandera:
+        print("\n--------------- G R A F I C O S ---------------\n")
+        print("[1] Promedio de temperaturas anuales de los últimos 5 años \n[2] Promedio de humedad de los últimos 5 años")
+        print("[3] Milímetros máximos de lluvia de los últimos 5 años \n[4] Temperatura máxima de los últimos 5 años\n[5] Salir\n")
+        print("-----------------------------------------------")
+
+        Seleccion = input("\nSelecciona una opcion (1-2-3-4-5): ")
+        while Seleccion not in ["1","2","3","4","5"]:
+            Seleccion = input("\nSelecciona una opcion VALIDA (1-2-3-4-5): ")
+
+        if Seleccion == "1":
+            print("Nada")
+               
+        elif Seleccion == "2":
+            print("Nada")
+
+        elif Seleccion == "3":
+            print("Nada")
+
+        elif Seleccion == "4":
+            print("Nada")
+            
+        elif Seleccion == "5":
+            print("Nada")
+            bandera = False
 
 def main():
     bandera = True
