@@ -123,7 +123,7 @@ def mostrarDireccion(url):
     Pos: Imprime la direccion exacta de donde se buscaran alertas."""
     infoDireccion = jsonMain.urlaLista(url)
     direccionOrdenada = infoDireccion["results"][0]["formatted_address"]
-    print("¡Buscando alertas en: "+direccionOrdenada+"!"\n)
+    print("¡Buscando alertas en: "+direccionOrdenada+"!\n")
 
 def alertasLocales():
     """Funcion 'Maestra' de las alertasLocales, recopila y ejecuta todas las funciones relacionadas
@@ -203,10 +203,6 @@ def instertaImagen():
     print("Ponga la imagen a analizar en la carpeta del programa, sin editar y en formato .png")
     nombreImagen = input("ingrese el nombre de la imagen: ")
     nombreImagen = nombreImagen + ".png"
-    while not os.path.exists(nombreImagen):
-        print("No se pudo cargar la imagen, verifique que haya escrito el nombre correctamente")
-        nombreImagen = input("ingrese el nombre de la imagen: ")
-        nombreImagen = nombreImagen + ".png"
     try:
         imagen = cv2.imread(nombreImagen)
         imagenHSV = cv2.cvtColor(imagen, cv2.COLOR_BGR2HSV)
@@ -376,6 +372,8 @@ def menuRadar():
         if opcion == "1":
             imagenIngresada, exito = instertaImagen()
             if exito:
+                cv2.imshow("Imagen a Analizar.. (Cierre la imagen para continuar)",imagenIngresada)
+                cv2.waitKey(0)
                 alertas, exito = generaAlertas(imagenIngresada, provincias)
                 if exito:
                     imprimeAlertas(alertas)
@@ -386,6 +384,8 @@ def menuRadar():
         if opcion == "2":
             imagenActual, exito = obtenerImagenWeb()
             if exito:
+                cv2.imshow("Imagen a Analizar.. (Cierre la imagen para continuar)",imagenActual)
+                cv2.waitKey(0)
                 alertas, exito = generaAlertas(imagenActual, provincias)
                 if exito:
                     imprimeAlertas(alertas)
