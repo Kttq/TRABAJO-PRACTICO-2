@@ -374,6 +374,8 @@ def menuRadar():
         if opcion == "1":
             imagenIngresada, exito = insertaImagen()
             if exito:
+                cv2.imshow("Imagen a Analizar.. (Cierre la imagen para continuar)",imagenIngresada)
+                cv2.waitKey(0)
                 alertas, exito = generaAlertas(imagenIngresada, provincias)
                 if exito:
                     imprimeAlertas(alertas)
@@ -384,6 +386,8 @@ def menuRadar():
         if opcion == "2":
             imagenActual, exito = obtenerImagenWeb()
             if exito:
+                cv2.imshow("Imagen a Analizar.. (Cierre la imagen para continuar)",imagenActual)
+                cv2.waitKey(0)
                 alertas, exito = generaAlertas(imagenActual, provincias)
                 if exito:
                     imprimeAlertas(alertas)
