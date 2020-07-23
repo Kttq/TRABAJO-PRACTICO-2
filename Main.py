@@ -1,4 +1,5 @@
 import jsonMain
+import csvMain
 from geopy import distance #Sirve para calcular distancia entre coordenadas.
 from unidecode import unidecode #Sirve para eliminar errores en URLs por caracteres especiales.
 import cv2
@@ -94,24 +95,42 @@ def calculoDistancia(coordAlertas,coordUsuario,alertas):
         Pre: necesita que le pasen listado de coordenadas afectadas por alertas, coordenadas dadas por el usuario
         y las alertas en cuestion:
         Pos: si detecta una alerta dentro de la distancia calculada, la muestra."""
-    radioMin = input("Ingrese el radio de escaneo (en KM y se recomienda 50Km como minimo): ")
+    validoDist = True
+    radioMin = input("Ingrese el radio de escaneo (Maximo de 100Km): ")
     radioMin = intCheck(radioMin)
-    print("\nCalculando distancia...\n")
-    lista = []
-    for alerta in coordAlertas: #Recuerdo que separe la lista de coordenadas por alertas
-        for coordenada in alerta:
-            alertaCoord = (coordenada["Latitud"],coordenada["Longitud"])
-            distancia = round((distance.distance(coordUsuario,alertaCoord).km),5)
-            if distancia <= radioMin:
-                print(f"Alerta encontrada a {distancia}Km !!!")
-                indice = coordAlertas.index(alerta) #Consigo en cual alerta esta dicha coordenada.
-                lista.append(alertas[indice]) #Muestro la alerta encontrada
-    mostrarAlertas(lista)
-    
+    while validoDist:
+        if radioMin <= 100:
+            print("\nCalculando distancia...\n")
+            lista = []
+            for alerta in coordAlertas: #Recuerdo que separe la lista de coordenadas por alertas
+                for coordenada in alerta:
+                    alertaCoord = (coordenada["Latitud"],coordenada["Longitud"])
+                    distancia = round((distance.distance(coordUsuario,alertaCoord).km),5)
+                    if distancia <= radioMin:
+                        print(f"Alerta encontrada a {distancia}Km !!!")
+                        indice = coordAlertas.index(alerta) #Consigo en cual alerta esta dicha coordenada.
+                        lista.append(alertas[indice]) #Muestro la alerta encontrada
+            validoDist = False
+            mostrarAlertas(lista)
+        else:
+            print("\nDistancia a calcular muy grande.")
+            radioMin = input("\nIngrese el radio de escaneo (Maximo de 100Km): ")
+            radioMin = intCheck(radioMin)
+
+def mostrarDireccion(url):
+    """Procedimiento que recibe un url, de el cual extrae la direccion EXACTA de donde se hizo la request
+    Pre: Necesita un Url
+    Pos: Imprime la direccion exacta de donde se buscaran alertas."""
+    infoDireccion = jsonMain.urlaLista(url)
+    direccionOrdenada = infoDireccion["results"][0]["formatted_address"]
+    print("¡Buscando alertas en: "+direccionOrdenada+"!"\n)
+
 def alertasLocales():
     """Funcion 'Maestra' de las alertasLocales, recopila y ejecuta todas las funciones relacionadas
     con esta actividad."""
     coordUsuario = latlongInput()
+    url = f"https://maps.googleapis.com/maps/api/geocode/json?latlng={str(coordUsuario[0])},{str(coordUsuario[1])}&key={GOOGLE_KEY}"
+    mostrarDireccion(url)
     alertas = jsonMain.formatoAlertas(URL_ALERTAS)
     coordenadas = listaCoords(alertas)
     calculoDistancia(coordenadas,coordUsuario,alertas)
@@ -398,7 +417,7 @@ def main():
             mostrarAlertas(alertas)
 
         elif Seleccion == "3":
-            print("Nada")
+            csvMain.main()
 
         elif Seleccion == "4":
             pronosticoExtendido()
