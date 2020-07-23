@@ -2,6 +2,7 @@ import csv
 import matplotlib.pyplot as plt
 import numpy as np
 #"Date","Longitude","Latitude","Elevation","Max Temperature","Min Temperature","Precipitation","Wind","Relative Humidity","Solar"    
+
 def calcularPromedios(data):
     promediosTempMax = []
     promediosTempMin = []
@@ -11,68 +12,90 @@ def calcularPromedios(data):
     tempMin = data[1]
     humedad = data[2]
 
-    for i in tempMax:
-        promedio = sum(i) / len(i)
+    for i in range(len(tempMax)):
+        promedio = sum(tempMax[i]) / len(tempMax[i])
         promediosTempMax.append(promedio)
 
-    for j in tempMin:
-        promedio = sum(j) / len(j)
+    for j in range(len(tempMin)):
+        promedio = sum(tempMin[j]) / len(tempMin[j])
         promediosTempMin.append(promedio)
     
-    for k in humedad:
-        promedio = sum(k) / len(k)
+    for k in range(len(humedad)):
+        promedio = sum(humedad[k]) / len(humedad[k])
         promedioHumedad.append(promedio)
 
     listaPromedios = [promediosTempMax, promediosTempMin, promedioHumedad]
 
     return listaPromedios
 
+def consultarIndiceVacio(lista, i):
+    if len(lista[i]) == 0:
+        lista[i] = [0]
+
+def filtroCategoria(diccionario):
+    maxtemp = [[],[],[],[],[]]
+    mintemp = [[],[],[],[],[]]
+    humedad = [[],[],[],[],[]]
+    lluvia = [[],[],[],[],[]]
+    
+    for año in diccionario:
+        if año == "2015":
+            slot = 0
+        elif año == "2016":
+            slot = 1
+        elif año == "2017":
+            slot = 2
+        elif año == "2018":
+            slot = 3
+        elif año == "2019":
+            slot = 4
+        else:
+            pass
+
+        for indice in range(len(diccionario[año])):
+            maxtemp[slot].append(float(diccionario[año][indice]["Max t"]))
+            mintemp[slot].append(float(diccionario[año][indice]["Min t"]))
+            lluvia[slot].append(float(diccionario[año][indice]["Precipitaciones"]))
+            humedad[slot].append(float(diccionario[año][indice]["Humedad"]))
+    
+    listaDatos = [maxtemp, mintemp, humedad, lluvia]
+    for i in range(5):
+        consultarIndiceVacio(maxtemp, i)
+        consultarIndiceVacio(mintemp, i)
+        consultarIndiceVacio(humedad, i)
+        consultarIndiceVacio(lluvia, i)
+    
+    return listaDatos
+
 def filtroAnio(lista):
     
-    tempmax= [[],[],[],[],[]]
-    tempmin= [[],[],[],[],[]]
-    humedad = [[],[],[],[],[]]
-    precipitaciones = [[],[],[],[],[]]
+    '''Se filtra toda la informacion de csvaLista segun el año de la fecha. Para datos del año 2020 y anteriores a 2015
+       se guardan en la llave Otros
+    '''
+
+    años = {"2015": [], "2016": [], "2017": [], "2018": [], "2019": [], "Otros": []}
     
     for i in lista:
         
         if i["Fecha"][5:9] == "2015":
-            tempmax[0].append(float(i["Max t"]))
-            tempmin[0].append(float(i["Min t"]))
-            humedad[0].append(float(i["Humedad"]))
-            precipitaciones[0].append(float(i["Precipitaciones"]))
-        
-        elif i["Fecha"][5:9] == "2016":
-            tempmax[1].append(float(i["Max t"]))
-            tempmin[1].append(float(i["Min t"]))
-            humedad[1].append(float(i["Humedad"]))
-            precipitaciones[1].append(float(i["Precipitaciones"]))
+            años["2015"].append(i)
 
+        elif i["Fecha"][5:9] == "2016":
+            años["2016"].append(i)
 
         elif i["Fecha"][5:9] == "2017":
-            tempmax[2].append(float(i["Max t"]))
-            tempmin[2].append(float(i["Min t"]))
-            humedad[2].append(float(i["Humedad"]))
-            precipitaciones[2].append(float(i["Precipitaciones"]))
+            años["2017"].append(i)
 
         elif i["Fecha"][5:9] == "2018":
-            tempmax[3].append(float(i["Max t"]))
-            tempmin[3].append(float(i["Min t"]))
-            humedad[3].append(float(i["Humedad"]))
-            precipitaciones[3].append(float(i["Precipitaciones"]))
+            años["2018"].append(i)
 
         elif i["Fecha"][5:9] == "2019":
-            tempmax[4].append(float(i["Max t"]))
-            tempmin[4].append(float(i["Min t"]))
-            humedad[4].append(float(i["Humedad"]))
-            precipitaciones[4].append(float(i["Precipitaciones"]))
+            años["2019"].append(i)
 
         else:
-            print("Error")
-
-    data = [tempmax,tempmin,humedad, precipitaciones]
+            años["Otros"].append(i)
     
-    return data
+    return años
 
 def csvaLista():
     
@@ -103,51 +126,73 @@ def csvaLista():
 def main():
     lista = csvaLista()
     data = filtroAnio(lista)
-    promedios = calcularPromedios(data)
-    print("1) Grafico promedio de temperaturas por año.\n2) Grafico promedio de humedad por año.")
-    menu = input("3) Milímetros máximos de lluvia de los últimos 5 años.\n4) Temperatura máxima de los últimos 5 años. \n")
-    if menu == "1":
-        y = promedios[0]
-        x = [2015, 2016, 2017, 2018, 2019]
-        y2 = promedios[1]
-
-        plt.plot(x, y, "r")
-        plt.plot(x, y2, "b")
-        
-        
-        plt.xlabel("Año")
-        plt.ylabel("ºC")
-        plt.title("Promedio de temperatura maxima y minima por año")
-        plt.show()
-
-    elif menu =="2":
-        y = promedios[2]
-        x = [2015, 2016, 2017, 2018, 2019]
-
-        plt.plot(x, y, "r")
-
-        plt.xlabel("Año")
-        plt.ylabel("Humedad relativa (fraccion)")
-        plt.title("Promedio de humedad por año")
-        plt.show()
+    dataPorAño = filtroCategoria(data)
+    promedios = calcularPromedios(dataPorAño)
     
-    
-    elif menu == "3":
-        maxLluviaAnual = []
+    bandera = True
+    while bandera:
+        #menu
+        print("-----------------------------------------------")
+        print("[1] Grafico promedio de temperaturas por año.\n[2] Grafico promedio de humedad por año.")
+        print("[3] Milímetros máximos de lluvia de los últimos 5 años.\n[4] Temperatura máxima de los últimos 5 años. \n[5] Salir.")
+        print("-----------------------------------------------")
         
-        for año in range(5):
-            maxLluviaAnual.append(max(data[3][año]))
+        menu = input("\nSelecciona una opcion (1-2-3-4-5): ")
+        while menu not in ["1","2","3","4","5"]:
+            menu = input("\nSelecciona una opcion válida (1-2-3-4-5): ")
         
-        for i in reversed(maxLluviaAnual):
-            print(i)
-    
-    elif menu == "4":
-        maxTempAnual = []
+        if menu == "1":
+            y = promedios[0]
+            x = [2015, 2016, 2017, 2018, 2019]
+            y2 = promedios[1]
+
+            plt.plot(x, y, "r")
+            plt.plot(x, y2, "b")
+            
+            
+            plt.xlabel("Año")
+            plt.ylabel("ºC")
+            plt.title("Promedio de temperatura maxima y minima por año")
+            
+            plt.show()
+
+        elif menu =="2":
+            y = promedios[2]
+            x = [2015, 2016, 2017, 2018, 2019]
+
+            plt.plot(x, y, "r")
+
+            plt.xlabel("Año")
+            plt.ylabel("Humedad relativa (fraccion)")
+            plt.title("Promedio de humedad por año")
+            plt.show()
         
-        for año in range(5):
-            maxTempAnual.append(max(data[0][año]))
         
-        for i in reversed(maxTempAnual):
-            print(i)
+        elif menu == "3":
+            maxLluviaAnual = []
+            
+            for año in range(5):
+                maxLluviaAnual.append(max(dataPorAño[3][año]))
+
+            for record in maxLluviaAnual:          
+                for indice in lista:
+                    if str(record) == indice["Precipitaciones"]:
+                        print("El dia " + indice["Fecha"] + " en las coordenadas: " + indice["Longitud"] + ", " + indice["Latitud"])
+                        print("Se registraron " + indice["Precipitaciones"] + " milimetros de lluvia.\n")   
+        
+        elif menu == "4":
+            maxTempAnual = []
+            
+            for año in range(5):
+                maxTempAnual.append(max(dataPorAño[0][año]))
+            
+            for record in maxTempAnual:          
+                for indice in lista:
+                    if str(record) == indice["Max t"]:
+                        print("El dia " + indice["Fecha"] + " en las coordenadas: " + indice["Longitud"] + ", " + indice["Latitud"])
+                        print("Se registraron " + indice["Max t"] + " grados centigrados.\n")
+
+        elif menu == "5":
+            bandera = False
     
 main()

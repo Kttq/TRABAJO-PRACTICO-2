@@ -193,7 +193,7 @@ def main():
             mostrarAlertas(alertas)
 
         elif Seleccion == "3":
-            print("Nada")
+            import csvMain
 
         elif Seleccion == "4":
             pronosticoExtendido()
