@@ -349,7 +349,6 @@ def obtenerImagenWeb():
                 with open(nombreImagen, 'wb') as file:
                     file.write(url.read())
             imagenActual = cv2.imread(nombreImagen)
-            #imagenActualHSV = cv2.cvtColor(imagenActual, cv2.COLOR_BGR2HSV)
             exito = True
         except:
             diezMinutos = timedelta(minutes =+ 10)
