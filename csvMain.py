@@ -169,27 +169,29 @@ def main():
             plt.show()
     
         elif menu == "3":
-            maxLluviaAnual = []
             for anio in range(5):
-                maxLluviaAnual.append(max(dataPorAnio[3][anio]))
-            for record in maxLluviaAnual:
-                for indice in lista:
-                    if str(record) == indice["Precipitaciones"]:
-                        print("El dia " + indice["Fecha"] + " en las coordenadas: " + indice["Longitud"] + ", " + indice["Latitud"])
-                        print("Se registraron " + indice["Precipitaciones"] + " milimetros de lluvia.\n")
+                maxLluvia = (max(dataPorAnio[3][anio]))
+                anioActual = str(2015 + anio)
+                if len(data[anioActual]) == 0:
+                    print(f'No hay datos del año {anioActual}\n')
+                else:
+                    for dia in data[anioActual]:
+                            if float(dia['Precipitaciones']) == maxLluvia:
+                                print("El dia " + dia["Fecha"] + " en las coordenadas: " + dia["Longitud"] + ", " + dia["Latitud"])
+                                print("Se registraron " + dia["Precipitaciones"] + " milimetros de lluvia.\n")
         
-        elif menu == "4":
-            maxTempAnual = []           
+        elif menu == "4":         
             for anio in range(5):
-                maxTempAnual.append(max(dataPorAnio[0][anio]))     
-            for record in maxTempAnual:          
-                for indice in lista:
-                    if str(record) == indice["Max t"]:
-                        print("El dia " + indice["Fecha"] + " en las coordenadas: " + indice["Longitud"] + ", " + indice["Latitud"])
-                        print("Se registraron " + indice["Max t"] + " grados centigrados.\n")
+                maxTemp = max(dataPorAnio[0][anio])                
+                anioActual = str(2015 + anio)
+                if len(data[anioActual]) == 0:
+                    print(f'No hay datos del año {anioActual}\n')
+                else:
+                    for dia in data[anioActual]:
+                        if float(dia['Max t']) == maxTemp:
+                            print("El dia " + dia["Fecha"] + " en las coordenadas: " + dia["Longitud"] + ", " + dia["Latitud"])
+                            print("Se registraron " + dia["Max t"] + " grados centigrados.\n")
 
         elif menu == "5":
             bandera = False
-            
-main()
     
