@@ -117,11 +117,20 @@ def calculoDistancia(coordAlertas,coordUsuario,alertas):
             radioMin = input("\nIngrese el radio de escaneo (Maximo de 100Km): ")
             radioMin = intCheck(radioMin)
 
-    
+def mostrarDireccion(url):
+    """Procedimiento que recibe un url, de el cual extrae la direccion EXACTA de donde se hizo la request
+    Pre: Necesita un Url
+    Pos: Imprime la direccion exacta de donde se buscaran alertas."""
+    infoDireccion = jsonMain.urlaLista(url)
+    direccionOrdenada = infoDireccion["results"][0]["formatted_address"]
+    print("¡Buscando alertas en: "+direccionOrdenada+"!"\n)
+
 def alertasLocales():
     """Funcion 'Maestra' de las alertasLocales, recopila y ejecuta todas las funciones relacionadas
     con esta actividad."""
     coordUsuario = latlongInput()
+    url = f"https://maps.googleapis.com/maps/api/geocode/json?latlng={str(coordUsuario[0])},{str(coordUsuario[1])}&key={GOOGLE_KEY}"
+    mostrarDireccion(url)
     alertas = jsonMain.formatoAlertas(URL_ALERTAS)
     coordenadas = listaCoords(alertas)
     calculoDistancia(coordenadas,coordUsuario,alertas)
