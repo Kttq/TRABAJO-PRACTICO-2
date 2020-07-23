@@ -125,17 +125,9 @@ def csvaLista():
 def main():
     """Menu"""
     lista = csvaLista()
-    print("lista")
-    print(lista)
     data = filtroAnio(lista)
-    print("data")
-    print(data)
     dataPorAnio = filtroCategoria(data)
-    print("dataporanio")
-    print(dataPorAnio)
     promedios = calcularPromedios(dataPorAnio)
-    print("promedios")
-    print(promedios)
     bandera = True
     while bandera and not len(lista) == 0:
         #menu
@@ -144,8 +136,10 @@ def main():
         print("[3] Milímetros máximos de lluvia de los últimos 5 años.\n[4] Temperatura máxima de los últimos 5 años. \n[5] Salir.")
         print("-----------------------------------------------")
         menu = input("\nSelecciona una opcion (1-2-3-4-5): ")
+        print()
         while menu not in ["1","2","3","4","5"]:
             menu = input("\nSelecciona una opcion válida (1-2-3-4-5): ")
+            print()
         
         if menu == "1":
             y = promedios[0]
