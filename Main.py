@@ -103,13 +103,15 @@ def calculoDistancia(coordAlertas,coordUsuario,alertas):
             print("\nCalculando distancia...\n")
             lista = []
             for alerta in coordAlertas: #Recuerdo que separe la lista de coordenadas por alertas
+                alertaAgregada = False
                 for coordenada in alerta:
                     alertaCoord = (coordenada["Latitud"],coordenada["Longitud"])
                     distancia = round((distance.distance(coordUsuario,alertaCoord).km),5)
-                    if distancia <= radioMin:
+                    if distancia <= radioMin and not alertaAgregada:
                         print(f"Alerta encontrada a {distancia}Km !!!")
                         indice = coordAlertas.index(alerta) #Consigo en cual alerta esta dicha coordenada.
                         lista.append(alertas[indice]) #Muestro la alerta encontrada
+                        alertaAgregada = True
             validoDist = False
             mostrarAlertas(lista)
         else:
@@ -123,7 +125,7 @@ def mostrarDireccion(url):
     Pos: Imprime la direccion exacta de donde se buscaran alertas."""
     infoDireccion = jsonMain.urlaLista(url)
     direccionOrdenada = infoDireccion["results"][0]["formatted_address"]
-    print("¡Buscando alertas en: "+direccionOrdenada+"!"\n)
+    print("¡Buscando alertas en: "+direccionOrdenada+"!\n")
 
 def alertasLocales():
     """Funcion 'Maestra' de las alertasLocales, recopila y ejecuta todas las funciones relacionadas
@@ -196,17 +198,13 @@ def pronosticoExtendido():
             coordenadasCiudad = listaPronosticos[0][0]["Coord"]
             calculoDistancia(coordenadas,coordenadasCiudad,alertas)
 
-def instertaImagen():
+def insertaImagen():
     '''Función que recibe la imagen ingresada por el usuario
         Pos: En caso de exito, imagen ingresada, como un objeto de la clase ndarray, de 3 dimensiones, y True
              En caso de no exito, None y False'''
     print("Ponga la imagen a analizar en la carpeta del programa, sin editar y en formato .png")
     nombreImagen = input("ingrese el nombre de la imagen: ")
     nombreImagen = nombreImagen + ".png"
-    while not os.path.exists(nombreImagen):
-        print("No se pudo cargar la imagen, verifique que haya escrito el nombre correctamente")
-        nombreImagen = input("ingrese el nombre de la imagen: ")
-        nombreImagen = nombreImagen + ".png"
     try:
         imagen = cv2.imread(nombreImagen)
         imagenHSV = cv2.cvtColor(imagen, cv2.COLOR_BGR2HSV)
@@ -374,7 +372,7 @@ def menuRadar():
         while opcion not in ["1","2","3"]:
             opcion = input("\nSelecciona una opcion VALIDA (1-2-3): ")
         if opcion == "1":
-            imagenIngresada, exito = instertaImagen()
+            imagenIngresada, exito = insertaImagen()
             if exito:
                 alertas, exito = generaAlertas(imagenIngresada, provincias)
                 if exito:
