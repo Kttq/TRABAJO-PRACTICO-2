@@ -74,36 +74,37 @@ def filtroAnio(lista):
     '''Se filtra toda la informacion de csvaLista segun el año de la fecha. Para datos del año 2020 y anteriores a 2015
        se guardan en la llave Otros
     '''
-    años = {"2015": [], "2016": [], "2017": [], "2018": [], "2019": [], "Otros": []}
+    anios = {"2015": [], "2016": [], "2017": [], "2018": [], "2019": []}
     for i in lista:
         
-        if i["Fecha"][5:9] == "2015":
-            años["2015"].append(i)
+        fechaLista = i["Fecha"].split('/')
+        anio = fechaLista[2]
+        
+        if anio == "2015":
+            anios["2015"].append(i)
 
-        elif i["Fecha"][5:9] == "2016":
-            años["2016"].append(i)
+        elif anio == "2016":
+            anios["2016"].append(i)
 
-        elif i["Fecha"][5:9] == "2017":
-            años["2017"].append(i)
+        elif anio == "2017":
+            anios["2017"].append(i)
 
-        elif i["Fecha"][5:9] == "2018":
-            años["2018"].append(i)
+        elif anio == "2018":
+            anios["2018"].append(i)
 
-        elif i["Fecha"][5:9] == "2019":
-            años["2019"].append(i)
-
-        else:
-            años["Otros"].append(i)
+        elif anio == "2019":
+            anios["2019"].append(i)
     
-    return años
+    return anios
 
 def csvaLista():
     """Funcion que con un archivo CSV dado, lo transforma en una lista en la cual se puede manipular su informacion"""
     data_lista = []
-    archivo_csv = 'weatherdata.csv'
+    archivo_csv = 'weatherdata_original2.csv'
     try:
         with open(archivo_csv, 'r') as archivo:
             data_leida = csv.reader(archivo)
+            next(data_leida, None)
             for fila in data_leida:
                 indice = {"Fecha": fila[0],
                         "Longitud": fila[1],
@@ -124,9 +125,17 @@ def csvaLista():
 def main():
     """Menu"""
     lista = csvaLista()
+    print("lista")
+    print(lista)
     data = filtroAnio(lista)
-    dataPorAño = filtroCategoria(data)
-    promedios = calcularPromedios(dataPorAño)
+    print("data")
+    print(data)
+    dataPorAnio = filtroCategoria(data)
+    print("dataporanio")
+    print(dataPorAnio)
+    promedios = calcularPromedios(dataPorAnio)
+    print("promedios")
+    print(promedios)
     bandera = True
     while bandera and not len(lista) == 0:
         #menu
@@ -142,7 +151,7 @@ def main():
             y = promedios[0]
             x = np.linspace(2015, 2019, 5)
             y2 = promedios[1]
-
+            
             plt.plot(x, y, "r")
             plt.plot(x, y2, "b")
             plt.xlabel("Año")
@@ -161,18 +170,18 @@ def main():
     
         elif menu == "3":
             maxLluviaAnual = []
-            for año in range(5):
-                maxLluviaAnual.append(max(dataPorAño[3][año]))
-            for record in maxLluviaAnual:          
+            for anio in range(5):
+                maxLluviaAnual.append(max(dataPorAnio[3][anio]))
+            for record in maxLluviaAnual:
                 for indice in lista:
                     if str(record) == indice["Precipitaciones"]:
                         print("El dia " + indice["Fecha"] + " en las coordenadas: " + indice["Longitud"] + ", " + indice["Latitud"])
-                        print("Se registraron " + indice["Precipitaciones"] + " milimetros de lluvia.\n")   
+                        print("Se registraron " + indice["Precipitaciones"] + " milimetros de lluvia.\n")
         
         elif menu == "4":
             maxTempAnual = []           
-            for año in range(5):
-                maxTempAnual.append(max(dataPorAño[0][año]))            
+            for anio in range(5):
+                maxTempAnual.append(max(dataPorAnio[0][anio]))     
             for record in maxTempAnual:          
                 for indice in lista:
                     if str(record) == indice["Max t"]:
@@ -181,4 +190,6 @@ def main():
 
         elif menu == "5":
             bandera = False
+            
+main()
     
