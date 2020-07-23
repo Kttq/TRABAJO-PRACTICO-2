@@ -1,4 +1,5 @@
 import jsonMain
+import csvMain
 from geopy import distance #Sirve para calcular distancia entre coordenadas.
 from unidecode import unidecode #Sirve para eliminar errores en URLs por caracteres especiales.
 import cv2
@@ -407,7 +408,7 @@ def main():
             mostrarAlertas(alertas)
 
         elif Seleccion == "3":
-            print("Nada")
+            csvMain.main()
 
         elif Seleccion == "4":
             pronosticoExtendido()
