@@ -2,3 +2,6 @@ Updates:
 
 Creo mainCsv y listo en diccionarios los indices de weatherdata.csv
 
+Filtro la información según año y categoría
+
+Creo graficos y promedios de los datos

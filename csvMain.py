@@ -143,7 +143,7 @@ def main():
         
         if menu == "1":
             y = promedios[0]
-            x = [2015, 2016, 2017, 2018, 2019]
+            x = np.linspace(2015, 2019, 5)
             y2 = promedios[1]
 
             plt.plot(x, y, "r")
@@ -158,7 +158,7 @@ def main():
 
         elif menu =="2":
             y = promedios[2]
-            x = [2015, 2016, 2017, 2018, 2019]
+            x = np.linspace(2015, 2019, 5)
 
             plt.plot(x, y, "r")
 
@@ -195,4 +195,3 @@ def main():
         elif menu == "5":
             bandera = False
     
-main()
