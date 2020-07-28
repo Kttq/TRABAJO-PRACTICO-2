@@ -158,7 +158,7 @@ def buscarPronosticos(ciudad,links):
     lista = jsonMain.recolectoCiudadProv(links[0],ciudad)
     if len(lista) == 0:
         print("\nCiudad no encontrada...")
-        return []
+        listaPronosticos = []
 
     elif len(lista) > 1:
         print("\nMultiples resultados encontrados..")
@@ -170,11 +170,12 @@ def buscarPronosticos(ciudad,links):
         while provincia not in listaProv:
             provincia = input("Ingresa a una Provincia de las mostradas: ").lower()
         lista = [ciudad,provincia]
-        return list(map(jsonMain.pronosticoCiudad,URL_PRONOSTICO,[lista]*3))
+        listaPronosticos = list(map(jsonMain.pronosticoCiudad,URL_PRONOSTICO,[lista]*3))
 
     else:
         print("\nResultado encontrado...")
-        return list(map(jsonMain.pronosticoCiudad,URL_PRONOSTICO,lista*3))
+        listaPronosticos = list(map(jsonMain.pronosticoCiudad,URL_PRONOSTICO,lista*3))
+    return listaPronosticos
 
 def mostrarPronosticos(listaPronosticos):
     """ Procedimiento que tras pasarle una lista, muestra de manera ordenada pronosticos extendidos

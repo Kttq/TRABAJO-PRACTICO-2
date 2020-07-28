@@ -10,10 +10,10 @@ def urlaLista(url):
         abrir_url = urlopen(url_ingresada)
         leer_json = abrir_url.read()
         lista = json.loads(leer_json)    
-        return lista
     except:
         print("\nE R R O R: Falla en conexion a servidores (Lista Vacia/No es Json/Sin internet)")
-        return []
+        lista = []
+    return lista
 
 def formatoAlertas(url):
     """Funcion que recibe un url y retorna una lista con informacion relevante a Alertas
@@ -55,12 +55,11 @@ def obtenerCoords(url):
     Pos: Retorna, tras extraer informacion importante, una lista de diccionarios (coordenadas)"""
     listaUbicacion = urlaLista(url)
     try:
-        coords = {"Latitud": listaUbicacion["results"][0]["geometry"]["location"]["lat"], "Longitud":listaUbicacion["results"][0]["geometry"]["location"]["lng"]}
-        return coords 
+        coords = {"Latitud": listaUbicacion["results"][0]["geometry"]["location"]["lat"], "Longitud":listaUbicacion["results"][0]["geometry"]["location"]["lng"]} 
     except:
         print(f"Google no pudo encontrar alguna de las ciudades...\n")
-        errorCoords = {"Latitud": 0, "Longitud": 0}
-        return errorCoords
+        coords = {"Latitud": 0, "Longitud": 0}
+    return coords
 
 def recolectoCiudadProv(url,ciudad):
     """Funcion que recibe un Url y una ciudad (string) y devuelve una lista de [ciudad,provincia]
