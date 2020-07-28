@@ -1,6 +1,13 @@
 import jsonMain
+import csvMain
 from geopy import distance #Sirve para calcular distancia entre coordenadas.
 from unidecode import unidecode #Sirve para eliminar errores en URLs por caracteres especiales.
+import cv2
+import numpy as np
+import os.path
+from urllib.request import urlopen
+from datetime import datetime, timezone, timedelta
+import textwrap
 
 #URL DEL SNM
 URL_ALERTAS = "https://ws.smn.gob.ar/alerts/type/AL"
@@ -19,10 +26,11 @@ def intCheck(string):
     while bandera:
         try:
             string = int(string)
-            return string
+            bandera = False
         except:
             print("\nNumero ingresado invalido...")
             string = input("Ingrese un valor: ")  
+    return string
 
 def floatCheck(x,y):
     """ Funcion que permite chequear que un par de strings sean transformables a Float
@@ -32,11 +40,12 @@ def floatCheck(x,y):
     while bandera:
         try:
             x,y = float(x),float(y)
-            return x , y
+            bandera = False
         except:
             print("Numeros ingresados son invalidos...")
             x = input("Ingrese el primer valor: ")
             y = input("Ingrese el segundo valor: ")
+    return x , y
 
 def latlongInput():
     """ Funcion que se asegura que un par de strings ingresados sean validas coordenadas
@@ -49,9 +58,10 @@ def latlongInput():
         print("\nEspere un momento...\n")
         lat,lon = floatCheck(lat,lon)
         if (lat >= -90 and lat <= 90) and (lon >= -180 and lon <= 180) == True:
-            return lat,lon
+            bandera = False
         else:
             print("\nCoordenadas fuera de rango...")
+    return lat,lon
 
 def mostrarAlertas(listaAlertas):
     """ Procedimiento que recibe una lista de diccionarios y muestra de manera ordenada sus datos
@@ -63,7 +73,13 @@ def mostrarAlertas(listaAlertas):
         for alerta in listaAlertas:
             print(f"\nALERTA #{i+1}\n")
             for atributo in alerta:
-                print(atributo,":",alerta[atributo])
+                if type(alerta[atributo]) == str:
+                    txt = f"{atributo}: {alerta[atributo]}"
+                    print(textwrap.fill(txt))
+                elif type(alerta[atributo]) == list:
+                    print(atributo,":")
+                    for elemento in alerta[atributo]:
+                        print("-",elemento)
             i += 1
     else:
         print("\nNo hay alertas para mostrar...")    
@@ -97,13 +113,16 @@ def calculoDistancia(coordAlertas,coordUsuario,alertas):
             print("\nCalculando distancia...\n")
             lista = []
             for alerta in coordAlertas: #Recuerdo que separe la lista de coordenadas por alertas
+                alertaAgregada = False
                 for coordenada in alerta:
                     alertaCoord = (coordenada["Latitud"],coordenada["Longitud"])
-                    distancia = round((distance.distance(coordUsuario,alertaCoord).km),5)
-                    if distancia <= radioMin:
-                        print(f"Alerta encontrada a {distancia}Km !!!")
-                        indice = coordAlertas.index(alerta) #Consigo en cual alerta esta dicha coordenada.
-                        lista.append(alertas[indice]) #Muestro la alerta encontrada
+                    if alertaCoord != (0,0):
+                        distancia = round((distance.distance(coordUsuario,alertaCoord).km),5)
+                        if distancia <= radioMin and not alertaAgregada:
+                            print(f"Alerta encontrada a {distancia}Km !!!")
+                            indice = coordAlertas.index(alerta) #Consigo en cual alerta esta dicha coordenada.
+                            lista.append(alertas[indice]) #Muestro la alerta encontrada
+                            alertaAgregada = True
             validoDist = False
             mostrarAlertas(lista)
         else:
@@ -116,8 +135,11 @@ def mostrarDireccion(url):
     Pre: Necesita un Url
     Pos: Imprime la direccion exacta de donde se buscaran alertas."""
     infoDireccion = jsonMain.urlaLista(url)
-    direccionOrdenada = infoDireccion["results"][0]["formatted_address"]
-    print("¡Buscando alertas en: "+direccionOrdenada+"!"\n)
+    try:
+        direccionOrdenada = infoDireccion["results"][0]["formatted_address"]
+        print("¡Buscando alertas en: "+direccionOrdenada+"!\n")
+    except:
+        print("Direccion no encontrada!")
 
 def alertasLocales():
     """Funcion 'Maestra' de las alertasLocales, recopila y ejecuta todas las funciones relacionadas
@@ -160,16 +182,17 @@ def mostrarPronosticos(listaPronosticos):
         Pos: Muestra dichos pronosticos"""
     if len(listaPronosticos) != 0:
         i = 0
-        print("\nLos pronosticos encontrados son...\n")
+        print("\nLos pronosticos encontrados son...")
         for pronostico in listaPronosticos:
-            print(f"DIA #{i+1}")
-            for atributo in pronostico:
-                if type(atributo) == dict:
-                    for subAtributo in atributo:
-                        print(subAtributo,":",atributo[subAtributo])
-                    print()
-                else:
-                    print(atributo,":",pronostico[atributo])
+            print(f"\nDIA #{i+1}")
+            for atributo in pronostico: 
+                    for elemento in atributo:
+                        if type(atributo[elemento]) == dict:
+                            print("\n-- ",elemento," --")
+                            for subElemento in atributo[elemento]:
+                                txt = f"{subElemento}: {atributo[elemento][subElemento]}"
+                                print(textwrap.fill(txt))
+
             i += 1
     else:
         print("No hay pronostico para mostrar...\n")
@@ -180,7 +203,7 @@ def pronosticoExtendido():
     listaPronosticos = buscarPronosticos(ciudad,URL_PRONOSTICO)
     mostrarPronosticos(listaPronosticos)
     if listaPronosticos != []:
-        seleccion = input(f"Desea escanear por alertas en {ciudad.capitalize()}? (Y/N): ").lower()
+        seleccion = input(f"\nDesea escanear por alertas en {ciudad.capitalize()}? (Y/N): ").lower()
         while seleccion not in "yn":
             seleccion = input("Ingrese una opcion valida (Y/N): ").lower()
         if seleccion == "y":
@@ -189,6 +212,208 @@ def pronosticoExtendido():
             coordenadas = listaCoords(alertas)
             coordenadasCiudad = listaPronosticos[0][0]["Coord"]
             calculoDistancia(coordenadas,coordenadasCiudad,alertas)
+
+def insertaImagen():
+    '''Función que recibe la imagen ingresada por el usuario
+        Pos: En caso de exito, imagen ingresada, como un objeto de la clase ndarray, de 3 dimensiones, y True
+             En caso de no exito, None y False'''
+    print("Ponga la imagen a analizar en la carpeta del programa, sin editar y en formato .png")
+    nombreImagen = input("ingrese el nombre de la imagen: ")
+    nombreImagen = nombreImagen + ".png"
+    try:
+        imagen = cv2.imread(nombreImagen)
+        imagenHSV = cv2.cvtColor(imagen, cv2.COLOR_BGR2HSV)
+        exito = True
+    except:
+        imagen = None
+        exito = False
+    return imagen, exito
+
+def analizaImagen(imagen, criterio, alertas):
+    '''Función que verifica si se cumple condición para dar alerta
+       Pre: Imagen cortada: ndarray de 3 dimensiones, criterio para dar alerta: entero,
+            diccionario: donde se almacena un booleano por tipo de lluvia'''
+    ROJO1_MIN = np.array([0, 50, 40])
+    ROJO1_MAX = np.array([5, 255, 255])
+    ROJO2_MIN = np.array([175, 50, 40])
+    ROJO2_MAX = np.array([180, 255, 255])
+    MAGENTA_MIN = np.array([140, 50, 40])
+    MAGENTA_MAX = np.array([170, 255, 255])
+    AMARILLO_MIN = np.array([10, 50, 40])
+    AMARILLO_MAX = np.array([30, 255, 255])
+    AZULVERDE_MIN = np.array([40, 50, 40])
+    AZULVERDE_MAX = np.array([135, 255, 255])
+    
+    rangoRojo = cv2.inRange(imagen, ROJO1_MIN, ROJO1_MAX) + cv2.inRange(imagen, ROJO2_MIN, ROJO2_MAX)
+    rangoMagenta = cv2.inRange(imagen, MAGENTA_MIN, MAGENTA_MAX)
+    rangoAmarillo = cv2.inRange(imagen, AMARILLO_MIN, AMARILLO_MAX)
+    rangoAzulVerde = cv2.inRange(imagen, AZULVERDE_MIN, AZULVERDE_MAX)
+    
+    contadorRojo = cv2.countNonZero(rangoRojo)
+    contadorMagenta = cv2.countNonZero(rangoMagenta)
+    contadorAmarillo = cv2.countNonZero(rangoAmarillo)
+    contadorAzulVerde = cv2.countNonZero(rangoAzulVerde)
+    
+    if contadorMagenta >= criterio:        
+        alertas["tormentaIntensa"] = True
+    if contadorRojo >= criterio:
+        alertas["lluviasFuertes"] = True
+    if contadorAmarillo >= criterio:
+        alertas["lluviasModeradas"] = True
+    if contadorAzulVerde >= criterio:
+        alertas["nubosidad"] = True
+
+def generaAlertas(imagen, provincias):
+    '''Función que genera las alertas, ordenadas por provincia
+       Pre: Imagen a analizar: ndarray de 3 dimensiones, diccionario: con provincias
+            a analizar como clave, y nombre de imagen como valor
+       Pos: Diccionario: con provincias como clave, y alertas como valor, y un booleano'''
+    largo, ancho = imagen.shape[:2]
+    particion = 20
+    criterio = 30    
+    provinciasAlertas = {}
+    imagenHSV = cv2.cvtColor(imagen, cv2.COLOR_BGR2HSV)
+    for nombreProvincia in provincias:
+        alertas = {"tormentaIntensa": False, "lluviasFuertes": False, "lluviasModeradas": False, "nubosidad": False}
+        try:
+            ruta = os.path.join(os.path.dirname(__file__), "provincias", provincias[nombreProvincia])
+            imagenProvincia = cv2.imread(ruta)
+            mascara = cv2.inRange(imagenProvincia, (0,0,0), (5,5,5))
+            imagenAnalizar = cv2.bitwise_and(imagenHSV, imagenHSV, mask=mascara)
+            exito = True
+        except:
+            imagenAnalizar = None
+            exito = False
+        if exito:
+            for i in range(particion):
+                for j in range(particion):
+                    imagenCortada = imagenAnalizar[(largo//particion) * i:(largo//particion) * (i+1), (ancho//particion) * j:(ancho//particion) * (j+1)]
+                    analizaImagen(imagenCortada, criterio, alertas)
+            provinciasAlertas[nombreProvincia] = alertas
+    return provinciasAlertas, exito
+
+def imprimeAlertas(provinciasAlertas):
+    '''Función que imprime alertas por provincia
+       Pre: Diccionario, con provincias como clave, y alertas como valor'''
+    for provincia, alertas in provinciasAlertas.items():
+        sinAlerta = True
+        print(f"\n{provincia}:")
+        if alertas['nubosidad']:
+            print("- Nubosidad")
+        if alertas['lluviasModeradas']:
+            print("- Lluvias Moderadas")
+            sinAlerta = False
+        if alertas['lluviasFuertes']:
+            print("- Lluvias Fuertes")
+            sinAlerta = False
+        if alertas['tormentaIntensa']:
+            print("- Tormentas Intensas")
+            sinAlerta = False
+        if sinAlerta:
+            print("- No hay alertas de lluvia")
+
+def fechaAEntero(fecha):
+    '''Función que recibe una fecha, y devuelve valores como entero, en diccionario
+       Pre: Fecha (objeto de clase datetime)
+       Pos: Diccionario'''
+    dia = fecha.day
+    mes = fecha.month
+    anio = fecha.year
+    hora = fecha.hour
+    minuto = fecha.minute
+    return {'anio': anio, 'mes': mes, 'dia': dia, 'hora': hora, 'minuto': minuto}
+
+def enteroAString(entero, minuto = False):
+    '''Función que genera un string de dos digitos, con un entero
+       Pre: Entero, booleano (opciona)
+       Pos: String'''
+    if entero < 10:
+        string = '0'+str(entero)
+    else:
+        string = str(entero)
+    if minuto:
+        string = string[0] + '0'
+    return string
+
+def fechaAString(fechaEntero):
+    '''Función que transforma enteros de un diccionario en strings
+       Pre: Diccionario, con enteros como valores
+       Pos: Diccionario, con strings como valores'''
+    anioString = str(fechaEntero['anio'])
+    mesString = enteroAString(fechaEntero['mes'])
+    diaString = enteroAString(fechaEntero['dia'])
+    horaString = enteroAString(fechaEntero['hora'])
+    minutoString = enteroAString(fechaEntero['minuto'], True)
+    return {'anio': anioString, 'mes': mesString, 'dia': diaString, 'hora': horaString, 'minuto': minutoString}
+
+def obtenerImagenWeb():
+    '''Función que obtiene imagen de la web
+       Pos: En caso de exito, imagen ingresada, como un objeto de la clase ndarray, de 3 dimensiones, y True
+            En caso de no exito, None y False'''
+    fechaUTC = datetime.now(tz = timezone.utc)
+    exito = False
+    contador = 0
+    while not exito and contador < 10:
+        try:
+            fechaEntero = fechaAEntero(fechaUTC)
+            fechaString = fechaAString(fechaEntero)
+            #ejemplo url: https://estaticos.smn.gob.ar/vmsr/radar/COMP_CEN_ZH_CMAX_20200718_183000Z.png
+            URL = 'https://estaticos.smn.gob.ar/vmsr/radar/COMP_CEN_ZH_CMAX_' + fechaString['anio'] + fechaString['mes'] + fechaString['dia'] + '_' + fechaString['hora'] + fechaString['minuto'] + '00Z.png'
+            with urlopen(URL) as url:
+                nombreImagen = 'radar' + fechaString['anio'] + fechaString['mes'] + fechaString['dia'] + '_' + fechaString['hora'] + fechaString['minuto'] + '00UTC.png'
+                with open(nombreImagen, 'wb') as file:
+                    file.write(url.read())
+            imagenActual = cv2.imread(nombreImagen)
+            exito = True
+        except:
+            diezMinutos = timedelta(minutes =+ 10)
+            fechaUTC -= diezMinutos
+            contador += 1
+            imagenActual = None
+    return imagenActual, exito
+
+def menuRadar():
+    '''Menu del analisis de una imagen de radar'''
+    bandera = True
+    provincias = {"Buenos Aires": "BuenosAires.png", "Cordoba": "Cordoba.png", "Corrientes": "Corrientes.png", "Entre Rios": "EntreRios.png",
+                  "La Pampa": "LaPampa.png", "La Rioja": "LaRioja.png", "Neuquen": "Neuquen.png", "Rio Negro": "RioNegro.png",
+                  "San Luis": "SanLuis.png", "Santa Fe": "SantaFe.png"}
+    while bandera:
+        print("\n---------------- ANALISIS RADAR ----------------\n")
+        print("[1] Igresar imagen\n[2] Estado actual\n[3] Volver\n")
+        print("------------------------------------------------")
+        
+        opcion = input("\nSeleccione una opcion: ")
+        while opcion not in ["1","2","3"]:
+            opcion = input("\nSelecciona una opcion VALIDA (1-2-3): ")
+        if opcion == "1":
+            imagenIngresada, exito = insertaImagen()
+            if exito:
+                print("Mostrando imagen a analizar, ciérrela para continuar")
+                cv2.imshow("Imagen a Analizar.. (Cierre la imagen para continuar)",imagenIngresada)
+                cv2.waitKey(0)                
+                alertas, exito = generaAlertas(imagenIngresada, provincias)
+                if exito:
+                    imprimeAlertas(alertas)
+                else:
+                    print("\nNo se pudo analizar la imagen, verifique que la imagen sea correcta.")
+            else:
+                print('\nNo se pudo cargar la imagen.')
+        if opcion == "2":
+            imagenActual, exito = obtenerImagenWeb()
+            if exito:
+                print("Mostrando imagen a analizar, ciérrela para continuar")
+                cv2.imshow("Imagen a Analizar.. (Cierre la imagen para continuar)",imagenActual)
+                cv2.waitKey(0)                
+                alertas, exito = generaAlertas(imagenActual, provincias)
+                if exito:
+                    imprimeAlertas(alertas)
+                else:
+                    print("\nNo se pudo analizar la imagen.")
+            else:
+                print('\nNo se pudo cargar la imagen.')
+        elif opcion == "3":
+            bandera = False
 
 def main():
     bandera = True
@@ -211,13 +436,13 @@ def main():
             mostrarAlertas(alertas)
 
         elif Seleccion == "3":
-            print("Nada")
+            csvMain.main()
 
         elif Seleccion == "4":
             pronosticoExtendido()
             
         elif Seleccion == "5":
-            print("Nada")  
+            menuRadar()
         
         elif Seleccion == "6":
             bandera = False
