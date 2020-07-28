@@ -54,8 +54,13 @@ def obtenerCoords(url):
     Pre: Recibe un Url (string)
     Pos: Retorna, tras extraer informacion importante, una lista de diccionarios (coordenadas)"""
     listaUbicacion = urlaLista(url)
-    coords = {"Latitud": listaUbicacion["results"][0]["geometry"]["location"]["lat"], "Longitud":listaUbicacion["results"][0]["geometry"]["location"]["lng"]}
-    return coords 
+    try:
+        coords = {"Latitud": listaUbicacion["results"][0]["geometry"]["location"]["lat"], "Longitud":listaUbicacion["results"][0]["geometry"]["location"]["lng"]}
+        return coords 
+    except:
+        print(f"Google no pudo encontrar alguna de las ciudades...\n")
+        errorCoords = {"Latitud": 0, "Longitud": 0}
+        return errorCoords
 
 def recolectoCiudadProv(url,ciudad):
     """Funcion que recibe un Url y una ciudad (string) y devuelve una lista de [ciudad,provincia]

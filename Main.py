@@ -7,6 +7,7 @@ import numpy as np
 import os.path
 from urllib.request import urlopen
 from datetime import datetime, timezone, timedelta
+import textwrap
 
 #URL DEL SNM
 URL_ALERTAS = "https://ws.smn.gob.ar/alerts/type/AL"
@@ -25,10 +26,11 @@ def intCheck(string):
     while bandera:
         try:
             string = int(string)
-            return string
+            bandera = False
         except:
             print("\nNumero ingresado invalido...")
             string = input("Ingrese un valor: ")  
+    return string
 
 def floatCheck(x,y):
     """ Funcion que permite chequear que un par de strings sean transformables a Float
@@ -38,11 +40,12 @@ def floatCheck(x,y):
     while bandera:
         try:
             x,y = float(x),float(y)
-            return x , y
+            bandera = False
         except:
             print("Numeros ingresados son invalidos...")
             x = input("Ingrese el primer valor: ")
             y = input("Ingrese el segundo valor: ")
+    return x , y
 
 def latlongInput():
     """ Funcion que se asegura que un par de strings ingresados sean validas coordenadas
@@ -55,9 +58,10 @@ def latlongInput():
         print("\nEspere un momento...\n")
         lat,lon = floatCheck(lat,lon)
         if (lat >= -90 and lat <= 90) and (lon >= -180 and lon <= 180) == True:
-            return lat,lon
+            bandera = False
         else:
             print("\nCoordenadas fuera de rango...")
+    return lat,lon
 
 def mostrarAlertas(listaAlertas):
     """ Procedimiento que recibe una lista de diccionarios y muestra de manera ordenada sus datos
@@ -69,7 +73,13 @@ def mostrarAlertas(listaAlertas):
         for alerta in listaAlertas:
             print(f"\nALERTA #{i+1}\n")
             for atributo in alerta:
-                print(atributo,":",alerta[atributo])
+                if type(alerta[atributo]) == str:
+                    txt = f"{atributo}: {alerta[atributo]}"
+                    print(textwrap.fill(txt))
+                elif type(alerta[atributo]) == list:
+                    print(atributo,":")
+                    for elemento in alerta[atributo]:
+                        print("-",elemento)
             i += 1
     else:
         print("\nNo hay alertas para mostrar...")    
@@ -106,12 +116,13 @@ def calculoDistancia(coordAlertas,coordUsuario,alertas):
                 alertaAgregada = False
                 for coordenada in alerta:
                     alertaCoord = (coordenada["Latitud"],coordenada["Longitud"])
-                    distancia = round((distance.distance(coordUsuario,alertaCoord).km),5)
-                    if distancia <= radioMin and not alertaAgregada:
-                        print(f"Alerta encontrada a {distancia}Km !!!")
-                        indice = coordAlertas.index(alerta) #Consigo en cual alerta esta dicha coordenada.
-                        lista.append(alertas[indice]) #Muestro la alerta encontrada
-                        alertaAgregada = True
+                    if alertaCoord != (0,0):
+                        distancia = round((distance.distance(coordUsuario,alertaCoord).km),5)
+                        if distancia <= radioMin and not alertaAgregada:
+                            print(f"Alerta encontrada a {distancia}Km !!!")
+                            indice = coordAlertas.index(alerta) #Consigo en cual alerta esta dicha coordenada.
+                            lista.append(alertas[indice]) #Muestro la alerta encontrada
+                            alertaAgregada = True
             validoDist = False
             mostrarAlertas(lista)
         else:
@@ -124,8 +135,11 @@ def mostrarDireccion(url):
     Pre: Necesita un Url
     Pos: Imprime la direccion exacta de donde se buscaran alertas."""
     infoDireccion = jsonMain.urlaLista(url)
-    direccionOrdenada = infoDireccion["results"][0]["formatted_address"]
-    print("¡Buscando alertas en: "+direccionOrdenada+"!\n")
+    try:
+        direccionOrdenada = infoDireccion["results"][0]["formatted_address"]
+        print("¡Buscando alertas en: "+direccionOrdenada+"!\n")
+    except:
+        print("Direccion no encontrada!")
 
 def alertasLocales():
     """Funcion 'Maestra' de las alertasLocales, recopila y ejecuta todas las funciones relacionadas
@@ -168,16 +182,17 @@ def mostrarPronosticos(listaPronosticos):
         Pos: Muestra dichos pronosticos"""
     if len(listaPronosticos) != 0:
         i = 0
-        print("\nLos pronosticos encontrados son...\n")
+        print("\nLos pronosticos encontrados son...")
         for pronostico in listaPronosticos:
-            print(f"DIA #{i+1}")
-            for atributo in pronostico:
-                if type(atributo) == dict:
-                    for subAtributo in atributo:
-                        print(subAtributo,":",atributo[subAtributo])
-                    print()
-                else:
-                    print(atributo,":",pronostico[atributo])
+            print(f"\nDIA #{i+1}")
+            for atributo in pronostico: 
+                    for elemento in atributo:
+                        if type(atributo[elemento]) == dict:
+                            print("\n-- ",elemento," --")
+                            for subElemento in atributo[elemento]:
+                                txt = f"{subElemento}: {atributo[elemento][subElemento]}"
+                                print(textwrap.fill(txt))
+
             i += 1
     else:
         print("No hay pronostico para mostrar...\n")
@@ -188,7 +203,7 @@ def pronosticoExtendido():
     listaPronosticos = buscarPronosticos(ciudad,URL_PRONOSTICO)
     mostrarPronosticos(listaPronosticos)
     if listaPronosticos != []:
-        seleccion = input(f"Desea escanear por alertas en {ciudad.capitalize()}? (Y/N): ").lower()
+        seleccion = input(f"\nDesea escanear por alertas en {ciudad.capitalize()}? (Y/N): ").lower()
         while seleccion not in "yn":
             seleccion = input("Ingrese una opcion valida (Y/N): ").lower()
         if seleccion == "y":
