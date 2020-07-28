@@ -225,9 +225,9 @@ def insertaImagen():
         imagenHSV = cv2.cvtColor(imagen, cv2.COLOR_BGR2HSV)
         exito = True
     except:
-        imagenHSV = None
+        imagen = None
         exito = False
-    return imagenHSV, exito
+    return imagen, exito
 
 def analizaImagen(imagen, criterio, alertas):
     '''Función que verifica si se cumple condición para dar alerta
@@ -272,13 +272,14 @@ def generaAlertas(imagen, provincias):
     particion = 20
     criterio = 30    
     provinciasAlertas = {}
+    imagenHSV = cv2.cvtColor(imagen, cv2.COLOR_BGR2HSV)
     for nombreProvincia in provincias:
         alertas = {"tormentaIntensa": False, "lluviasFuertes": False, "lluviasModeradas": False, "nubosidad": False}
         try:
             ruta = os.path.join(os.path.dirname(__file__), "provincias", provincias[nombreProvincia])
             imagenProvincia = cv2.imread(ruta)
             mascara = cv2.inRange(imagenProvincia, (0,0,0), (5,5,5))
-            imagenAnalizar = cv2.bitwise_and(imagen, imagen, mask=mascara)
+            imagenAnalizar = cv2.bitwise_and(imagenHSV, imagenHSV, mask=mascara)
             exito = True
         except:
             imagenAnalizar = None
@@ -363,14 +364,13 @@ def obtenerImagenWeb():
                 with open(nombreImagen, 'wb') as file:
                     file.write(url.read())
             imagenActual = cv2.imread(nombreImagen)
-            imagenActualHSV = cv2.cvtColor(imagenActual, cv2.COLOR_BGR2HSV)
             exito = True
         except:
             diezMinutos = timedelta(minutes =+ 10)
             fechaUTC -= diezMinutos
             contador += 1
-            imagenActualHSV = None
-    return imagenActualHSV, exito
+            imagenActual = None
+    return imagenActual, exito
 
 def menuRadar():
     '''Menu del analisis de una imagen de radar'''
@@ -389,8 +389,9 @@ def menuRadar():
         if opcion == "1":
             imagenIngresada, exito = insertaImagen()
             if exito:
+                print("Mostrando imagen a analizar, ciérrela para continuar")
                 cv2.imshow("Imagen a Analizar.. (Cierre la imagen para continuar)",imagenIngresada)
-                cv2.waitKey(0)
+                cv2.waitKey(0)                
                 alertas, exito = generaAlertas(imagenIngresada, provincias)
                 if exito:
                     imprimeAlertas(alertas)
@@ -401,13 +402,14 @@ def menuRadar():
         if opcion == "2":
             imagenActual, exito = obtenerImagenWeb()
             if exito:
+                print("Mostrando imagen a analizar, ciérrela para continuar")
                 cv2.imshow("Imagen a Analizar.. (Cierre la imagen para continuar)",imagenActual)
-                cv2.waitKey(0)
+                cv2.waitKey(0)                
                 alertas, exito = generaAlertas(imagenActual, provincias)
                 if exito:
                     imprimeAlertas(alertas)
                 else:
-                    print("\nNo se pudo analizar la imagen")
+                    print("\nNo se pudo analizar la imagen.")
             else:
                 print('\nNo se pudo cargar la imagen.')
         elif opcion == "3":
