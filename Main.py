@@ -219,8 +219,22 @@ def insertaImagen():
         Pos: En caso de exito, imagen ingresada, como un objeto de la clase ndarray, de 3 dimensiones, y True
              En caso de no exito, None y False'''
     print("Ponga la imagen a analizar en la carpeta del programa, sin editar y en formato .png")
-    nombreImagen = input("ingrese el nombre de la imagen: ")
-    nombreImagen = nombreImagen + ".png"
+    print("¿Dónde se encuentra la imagen?\n 1)Carpeta del programa\n 2)Otra carpeta\n")
+    ubicacionImagen = input("Seleccione la opción que desea : ")
+    bandera = True
+    while bandera:
+        if ubicacionImagen == '1':
+            nombreImagen = input("Ingrese el nombre de la imagen: ")
+            nombreImagen = nombreImagen + ".png"
+            bandera = False
+        elif ubicacionImagen == '2':
+            ruta = input("Ingrese la ruta (completa) de la carpeta donde se encuentra de la imagen: ")
+            nombreImagen = input("ingrese el nombre de la imagen: ")
+            nombreImagen = nombreImagen + ".png"
+            nombreImagen = os.path.join(ruta, nombreImagen)
+            bandera = False
+        else:
+            opcion= input("Seleccione una opción correcta (1-2): ")
     try:
         imagen = cv2.imread(nombreImagen)
         imagenHSV = cv2.cvtColor(imagen, cv2.COLOR_BGR2HSV)
@@ -255,14 +269,14 @@ def analizaImagen(imagen, criterio, alertas):
     contadorAmarillo = cv2.countNonZero(rangoAmarillo)
     contadorAzulVerde = cv2.countNonZero(rangoAzulVerde)
     
-    if contadorMagenta >= criterio:        
-        alertas["tormentaIntensa"] = True
+    if contadorMagenta >= criterio:
+        alertas["tormentaIntensa"] = "- Tormentas Intensas\n"
     if contadorRojo >= criterio:
-        alertas["lluviasFuertes"] = True
+        alertas["lluviasFuertes"] = "- Lluvias Fuertes\n"
     if contadorAmarillo >= criterio:
-        alertas["lluviasModeradas"] = True
+        alertas["lluviasModeradas"] = "- Lluvias Moderadas\n"
     if contadorAzulVerde >= criterio:
-        alertas["nubosidad"] = True
+        alertas["nubosidad"] = "- Nubosidad\n"
 
 def generaAlertas(imagen, provincias):
     '''Función que genera las alertas, ordenadas por provincia
@@ -271,13 +285,13 @@ def generaAlertas(imagen, provincias):
        Pos: Diccionario: con provincias como clave, y alertas como valor, y un booleano'''
     largo, ancho = imagen.shape[:2]
     particion = 20
-    criterio = 30    
+    criterio = 30
     provinciasAlertas = {}
     imagenHSV = cv2.cvtColor(imagen, cv2.COLOR_BGR2HSV)
     for nombreProvincia in provincias:
-        alertas = {"tormentaIntensa": False, "lluviasFuertes": False, "lluviasModeradas": False, "nubosidad": False}
+        alertas = {"nubosidad": "", "lluviasModeradas": "", "lluviasFuertes": "", "tormentaIntensa": ""}
         try:
-            ruta = os.path.join(os.path.dirname(__file__), "provincias", provincias[nombreProvincia])
+            ruta = os.path.join(os.path.dirname(os.path.abspath(__file__)), "provincias", provincias[nombreProvincia])
             imagenProvincia = cv2.imread(ruta)
             mascara = cv2.inRange(imagenProvincia, (0,0,0), (5,5,5))
             imagenAnalizar = cv2.bitwise_and(imagenHSV, imagenHSV, mask=mascara)
@@ -299,17 +313,10 @@ def imprimeAlertas(provinciasAlertas):
     for provincia, alertas in provinciasAlertas.items():
         sinAlerta = True
         print(f"\n{provincia}:")
-        if alertas['nubosidad']:
-            print("- Nubosidad")
-        if alertas['lluviasModeradas']:
-            print("- Lluvias Moderadas")
-            sinAlerta = False
-        if alertas['lluviasFuertes']:
-            print("- Lluvias Fuertes")
-            sinAlerta = False
-        if alertas['tormentaIntensa']:
-            print("- Tormentas Intensas")
-            sinAlerta = False
+        for alerta in alertas:
+            print(alertas[alerta], end = "")
+            if "Lluvias" in alertas[alerta] or "Tormentas" in alertas[alerta]:
+                sinAlerta = False
         if sinAlerta:
             print("- No hay alertas de lluvia")
 
