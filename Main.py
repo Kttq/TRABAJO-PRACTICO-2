@@ -218,7 +218,7 @@ def insertaImagen():
     '''Función que recibe la imagen ingresada por el usuario
         Pos: En caso de exito, imagen ingresada, como un objeto de la clase ndarray, de 3 dimensiones, y True
              En caso de no exito, None y False'''
-    print("Ponga la imagen a analizar en la carpeta del programa, sin editar y en formato .png")
+    print("La imagen a analizar debe estar sin editar y en formato .png")
     print("¿Dónde se encuentra la imagen?\n 1)Carpeta del programa\n 2)Otra carpeta\n")
     ubicacionImagen = input("Seleccione la opción que desea : ")
     bandera = True
@@ -229,7 +229,7 @@ def insertaImagen():
             bandera = False
         elif ubicacionImagen == '2':
             ruta = input("Ingrese la ruta (completa) de la carpeta donde se encuentra de la imagen: ")
-            nombreImagen = input("ingrese el nombre de la imagen: ")
+            nombreImagen = input("Ingrese el nombre de la imagen: ")
             nombreImagen = nombreImagen + ".png"
             nombreImagen = os.path.join(ruta, nombreImagen)
             bandera = False
