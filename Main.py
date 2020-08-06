@@ -234,7 +234,7 @@ def insertaImagen():
             nombreImagen = os.path.join(ruta, nombreImagen)
             bandera = False
         else:
-            opcion= input("Seleccione una opción correcta (1-2): ")
+            ubicacionImagen = input("Seleccione una opción correcta (1-2): ")
     try:
         imagen = cv2.imread(nombreImagen)
         imagenHSV = cv2.cvtColor(imagen, cv2.COLOR_BGR2HSV)
