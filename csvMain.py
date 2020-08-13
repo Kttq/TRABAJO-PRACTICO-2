@@ -7,6 +7,7 @@ def calcularPromedios(data):
     """Funcion que recibe data, y calcula promedios para luego devolver una lista
     Pre: Recibe una lista de datos
     Pos: Retorna una lista de promedios de temperatura y humedad"""
+    
     promediosTempMax = []
     promediosTempMin = []
     promedioHumedad = []
@@ -44,7 +45,7 @@ def calcularAño():
     
     return año
 
-def filtroCategoria(diccionario, año_corriente):
+def filtroCategoria(diccionario):
     """Funcion que retorna una lista de datos tras filtrar por año los datos recibidos de un diccionario"""
     maxtemp = [[],[],[],[],[]]  
     mintemp = [[],[],[],[],[]]  #Separo listas en "ranuras", para identificar cada año desde los 4 años anteriores a año presente.
@@ -52,16 +53,8 @@ def filtroCategoria(diccionario, año_corriente):
     lluvia = [[],[],[],[],[]]
 
     for año in diccionario:
-        if año == "4 años":     # 4 AÑOS ATRAS
-            slot = 0
-        elif año == "3 años":   # 3 AÑOS ATRAS
-            slot = 1
-        elif año == "2 años":   # 2 AÑOS ATRAS
-            slot = 2
-        elif año == "1 año":   # 1 AÑO ATRAS
-            slot = 3
-        elif año == "Presente":     # AÑO CORRIENTE
-            slot = 4
+
+        slot = int(año[0:1])
 
         for indice in range(len(diccionario[año])):
             maxtemp[slot].append(float(diccionario[año][indice]["Max t"]))
@@ -70,6 +63,7 @@ def filtroCategoria(diccionario, año_corriente):
             humedad[slot].append(float(diccionario[año][indice]["Humedad"]))
     
     listaDatos = [maxtemp, mintemp, humedad, lluvia]
+    
     for i in range(5):
         consultarIndiceVacio(maxtemp, i)
         consultarIndiceVacio(mintemp, i)
@@ -81,7 +75,7 @@ def filtroCategoria(diccionario, año_corriente):
 def filtroAño(lista, año_corriente):
     '''Se filtra toda la informacion de csvaLista segun el año de la fecha.
     '''
-    años = {"4 años": [], "3 años": [], "2 años": [], "1 año": [], "Presente": []}
+    años = {"0 años": [], "1 años": [], "2 años": [], "3 años": [], "4 años": []}
     
     for i in lista:
         
@@ -89,20 +83,15 @@ def filtroAño(lista, año_corriente):
         año = fechaLista[2]
         
         if año.isnumeric():
-            if int(año) == (año_corriente-4):
-                años["4 años"].append(i)
-
-            elif int(año) == (año_corriente-3):
-                años["3 años"].append(i)
-
-            elif int(año) == (año_corriente-2):
-                años["2 años"].append(i)
-
-            elif int(año) == (año_corriente-1):
-                años["1 año"].append(i)
-
-            elif int(año) == (año_corriente):
-                años["Presente"].append(i)
+            
+            añoIndice = año_corriente - int(año)        
+                
+            diccionario = (str(añoIndice) + " años")
+                
+            if diccionario in años:
+            
+                años[diccionario].append(i)
+        
         else:
             print("Recuerde introducir fechas numéricas. ")
     
@@ -141,13 +130,13 @@ def csvaLista():
             print("\nE R R O R: No se pudo abrir el archivo .CSV (Quizas no esta en la carpeta)\n")
             bandera = False
 
-def main():
+def menu():
     """Menu"""
     AÑO_CORRIENTE = calcularAño()
     
     lista = csvaLista()
     data = filtroAño(lista, AÑO_CORRIENTE)
-    dataPorAño = filtroCategoria(data, AÑO_CORRIENTE)
+    dataPorAño = filtroCategoria(data)
     promedios = calcularPromedios(dataPorAño)
     
 
@@ -166,50 +155,46 @@ def main():
             print()
         
         if menu == "1":
-            y = promedios[0]
+            y = (promedios[0]) # Doy vuelta para mostrar linea cronologica (recuerdo que promedios[0][0] pertenece al año corriente)
+            y.reverse() # TEMP MAX
+            
             x = [str(AÑO_CORRIENTE-4), str(AÑO_CORRIENTE-3), str(AÑO_CORRIENTE-2), str(AÑO_CORRIENTE-1), str(AÑO_CORRIENTE)] # Es necesario transformarlos en string
-            y2 = promedios[1]                                                                                                # para que no salgan coordenadas decimales
+            
+            y2 = (promedios[1])                                                                                               # para que no salgan coordenadas decimales
+            y2.reverse() # TEMP MIN
             
             plt.plot(x, y, "r")                                          # Dibujo de los valores
             plt.plot(x, y2, "b")
+            
             plt.xlabel("Año")                                            # Titulo eje X
             plt.ylabel("ºC")                                             # Titulo eje Y
+            
             plt.title("Promedio de temperatura maxima y minima por año") # Titulo grafico
+            
             plt.show()                                                   # Impresion del grafico
 
         elif menu =="2":
             y = promedios[2]
+            y.reverse()
+            
             x = [str(AÑO_CORRIENTE-4), str(AÑO_CORRIENTE-3), str(AÑO_CORRIENTE-2), str(AÑO_CORRIENTE-1), str(AÑO_CORRIENTE)]
+            
             plt.plot(x, y, "r")
+            
             plt.xlabel("Año")
             plt.ylabel("Humedad relativa (fraccion)")
+            
             plt.title("Promedio de humedad por año")
+            
             plt.show()
     
         elif menu == "3":
             for año in range(5):
                 
                 maxLluvia = (max(dataPorAño[3][año]))
-                 
-                if año == 0:
-                    añoLlave = "4 años"
-                    añoDato = AÑO_CORRIENTE-4
                 
-                elif año == 1:
-                    añoLlave = "3 años"
-                    añoDato = AÑO_CORRIENTE-3
-                
-                elif año == 2:
-                    añoLlave = "2 años"
-                    añoDato = AÑO_CORRIENTE-2
-                
-                elif año == 3:
-                    añoLlave = "1 año"
-                    añoDato = AÑO_CORRIENTE-1
-                
-                elif año == 4:
-                    añoLlave = "Presente"
-                    añoDato = AÑO_CORRIENTE
+                añoLlave = str(año)+" años"
+                añoDato = AÑO_CORRIENTE - año
                 
                 if len(data[añoLlave]) == 0:
                     print(f'No hay datos del año {str(añoDato)}\n')
@@ -225,25 +210,8 @@ def main():
                 
                 maxTemp = max(dataPorAño[0][año])                
                 
-                if año == 0:
-                    añoLlave = "4 años"
-                    añoDato = AÑO_CORRIENTE-4
-                
-                elif año == 1:
-                    añoLlave = "3 años"
-                    añoDato = AÑO_CORRIENTE-3
-                
-                elif año == 2:
-                    añoLlave = "2 años"
-                    añoDato = AÑO_CORRIENTE-2
-                
-                elif año == 3:
-                    añoLlave = "1 año"
-                    añoDato = AÑO_CORRIENTE-1
-                
-                elif año == 4:
-                    añoLlave = "Presente"
-                    añoDato = AÑO_CORRIENTE
+                añoLlave = str(año)+" años"
+                añoDato = AÑO_CORRIENTE - año
                 
                 if len(data[añoLlave]) == 0:
                     print(f'No hay datos del año {str(añoDato)}\n')

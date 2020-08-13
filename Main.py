@@ -444,7 +444,7 @@ def main():
             mostrarAlertas(alertas)
 
         elif Seleccion == "3":
-            csvMain.main()
+            csvMain.menu()
 
         elif Seleccion == "4":
             pronosticoExtendido()
