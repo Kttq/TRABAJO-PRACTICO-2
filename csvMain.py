@@ -97,12 +97,44 @@ def filtroAño(lista, año_corriente):
     
     return años
 
+def introducirArchivo():
+    '''Función que le permite al usuario ingresar un archivo CSV'''
+    
+    print("El archivo debe ser de extension CSV y respetar la forma:")
+    print('[Fecha, Longitud, Latitud, Elevacion, Max. Temp, Min. Temp, Precipitaciones, Viento, Humedad, Solar]\n')
+    print("¿Dónde se encuentra el archivo?\n 1)Carpeta del programa\n 2)Otra carpeta\n")
+    
+    ubicacionArchivo = input("Seleccione la opción que desea : ")
+    
+    bandera = True
+    
+    while bandera:
+        
+        if ubicacionArchivo == '1':
+            nombreArchivo = input("Ingrese el nombre del archivo (sin extension): ")
+            nombreArchivo = nombreArchivo + ".csv"
+            bandera = False
+        
+        elif ubicacionArchivo == '2':
+        
+            ruta = input("Ingrese la ruta (completa) de la carpeta donde se encuentra de el archivo: ")
+            nombreArchivo = input("Ingrese el nombre del archivo (sin extension): ")
+            nombreArchivo = nombreArchivo + ".csv"
+            
+            nombreArchivo = os.path.join(ruta, nombreArchivo)
+            bandera = False
+        else:
+            ubicacionArchivo = input("Seleccione una opción correcta (1-2): ")
+    
+    return nombreArchivo
+
 def csvaLista():
     """Funcion que con un archivo CSV dado, lo transforma en una lista en la cual se puede manipular su informacion
     Debe respetar la forma: ["Date", "Longitude", "Latitude", "Elevation", "Max Temperature", "Min Temperature", "Precipitation", "Wind", "Relative Humidity", "Solar"]   
     """
     data_lista = []
-    archivo_csv = 'weatherdata_original2.csv'
+    
+    archivo_csv = introducirArchivo()
     
     bandera = True
     while bandera == True:
@@ -124,103 +156,111 @@ def csvaLista():
                     data_lista.append(indice)
             
             bandera = False
-            return data_lista
+            exito = True
         
         except:
             print("\nE R R O R: No se pudo abrir el archivo .CSV (Quizas no esta en la carpeta)\n")
             bandera = False
+            exito = False
+        
+        return data_lista, exito
 
 def menu():
     """Menu"""
     AÑO_CORRIENTE = calcularAño()
     
-    lista = csvaLista()
-    data = filtroAño(lista, AÑO_CORRIENTE)
-    dataPorAño = filtroCategoria(data)
-    promedios = calcularPromedios(dataPorAño)
+    lista, exito = csvaLista()
     
-
     bandera = True
-    
-    while bandera and not len(lista) == 0:
-        #menu
-        print("-----------------------------------------------")
-        print("[1] Grafico promedio de temperaturas por año.\n[2] Grafico promedio de humedad por año.")
-        print("[3] Milímetros máximos de lluvia de los últimos 5 años.\n[4] Temperatura máxima de los últimos 5 años. \n[5] Salir.")
-        print("-----------------------------------------------")
-        menu = input("\nSelecciona una opcion (1-2-3-4-5): ")
-        print()
-        while menu not in ["1","2","3","4","5"]:
-            menu = input("\nSelecciona una opcion válida (1-2-3-4-5): ")
+
+    if exito:
+        data = filtroAño(lista, AÑO_CORRIENTE)
+        dataPorAño = filtroCategoria(data)
+        promedios = calcularPromedios(dataPorAño)
+
+        
+        while bandera and not len(lista) == 0:
+            #menu
+            print("-----------------------------------------------")
+            print("[1] Grafico promedio de temperaturas por año.\n[2] Grafico promedio de humedad por año.")
+            print("[3] Milímetros máximos de lluvia de los últimos 5 años.\n[4] Temperatura máxima de los últimos 5 años. \n[5] Salir.")
+            print("-----------------------------------------------")
+            menu = input("\nSelecciona una opcion (1-2-3-4-5): ")
             print()
-        
-        if menu == "1":
-            y = (promedios[0]) # Doy vuelta para mostrar linea cronologica (recuerdo que promedios[0][0] pertenece al año corriente)
-            y.reverse() # TEMP MAX
             
-            x = [str(AÑO_CORRIENTE-4), str(AÑO_CORRIENTE-3), str(AÑO_CORRIENTE-2), str(AÑO_CORRIENTE-1), str(AÑO_CORRIENTE)] # Es necesario transformarlos en string
+            while menu not in ["1","2","3","4","5"]:
+                menu = input("\nSelecciona una opcion válida (1-2-3-4-5): ")
+                print()
             
-            y2 = (promedios[1])                                                                                               # para que no salgan coordenadas decimales
-            y2.reverse() # TEMP MIN
-            
-            plt.plot(x, y, "r")                                          # Dibujo de los valores
-            plt.plot(x, y2, "b")
-            
-            plt.xlabel("Año")                                            # Titulo eje X
-            plt.ylabel("ºC")                                             # Titulo eje Y
-            
-            plt.title("Promedio de temperatura maxima y minima por año") # Titulo grafico
-            
-            plt.show()                                                   # Impresion del grafico
+            if menu == "1":
+                y = (promedios[0]) # Doy vuelta para mostrar linea cronologica (recuerdo que promedios[0][0] pertenece al año corriente)
+                y.reverse() # TEMP MAX
+                
+                x = [str(AÑO_CORRIENTE-4), str(AÑO_CORRIENTE-3), str(AÑO_CORRIENTE-2), str(AÑO_CORRIENTE-1), str(AÑO_CORRIENTE)] # Es necesario transformarlos en string
+                
+                y2 = (promedios[1])                                                                                               # para que no salgan coordenadas decimales
+                y2.reverse() # TEMP MIN
+                
+                plt.plot(x, y, "r")                                          # Dibujo de los valores
+                plt.plot(x, y2, "b")
+                
+                plt.xlabel("Año")                                            # Titulo eje X
+                plt.ylabel("ºC")                                             # Titulo eje Y
+                
+                plt.title("Promedio de temperatura maxima y minima por año") # Titulo grafico
+                
+                plt.show()                                                   # Impresion del grafico
 
-        elif menu =="2":
-            y = promedios[2]
-            y.reverse()
-            
-            x = [str(AÑO_CORRIENTE-4), str(AÑO_CORRIENTE-3), str(AÑO_CORRIENTE-2), str(AÑO_CORRIENTE-1), str(AÑO_CORRIENTE)]
-            
-            plt.plot(x, y, "r")
-            
-            plt.xlabel("Año")
-            plt.ylabel("Humedad relativa (fraccion)")
-            
-            plt.title("Promedio de humedad por año")
-            
-            plt.show()
-    
-        elif menu == "3":
-            for año in range(5):
+            elif menu =="2":
+                y = promedios[2]
+                y.reverse()
                 
-                maxLluvia = (max(dataPorAño[3][año]))
+                x = [str(AÑO_CORRIENTE-4), str(AÑO_CORRIENTE-3), str(AÑO_CORRIENTE-2), str(AÑO_CORRIENTE-1), str(AÑO_CORRIENTE)]
                 
-                añoLlave = str(año)+" años"
-                añoDato = AÑO_CORRIENTE - año
+                plt.plot(x, y, "r")
                 
-                if len(data[añoLlave]) == 0:
-                    print(f'No hay datos del año {str(añoDato)}\n')
+                plt.xlabel("Año")
+                plt.ylabel("Humedad relativa (fraccion)")
                 
-                else:
-                    for dia in data[añoLlave]:
-                            if float(dia['Precipitaciones']) == maxLluvia:
+                plt.title("Promedio de humedad por año")
+                
+                plt.show()
+        
+            elif menu == "3":
+                for año in range(5):
+                    
+                    maxLluvia = (max(dataPorAño[3][año]))
+                    
+                    añoLlave = str(año)+" años"
+                    añoDato = AÑO_CORRIENTE - año
+                    
+                    if len(data[añoLlave]) == 0:
+                        print(f'No hay datos del año {str(añoDato)}\n')
+                    
+                    else:
+                        for dia in data[añoLlave]:
+                                if float(dia['Precipitaciones']) == maxLluvia:
+                                    print("El dia " + dia["Fecha"] + " en las coordenadas: " + dia["Longitud"] + ", " + dia["Latitud"])
+                                    print("Se registraron " + dia["Precipitaciones"] + " milimetros de lluvia.\n")
+            
+            elif menu == "4":         
+                for año in range(5):
+                    
+                    maxTemp = max(dataPorAño[0][año])                
+                    
+                    añoLlave = str(año)+" años"
+                    añoDato = AÑO_CORRIENTE - año
+                    
+                    if len(data[añoLlave]) == 0:
+                        print(f'No hay datos del año {str(añoDato)}\n')
+                    
+                    else:
+                        for dia in data[añoLlave]:
+                            if float(dia['Max t']) == maxTemp:
                                 print("El dia " + dia["Fecha"] + " en las coordenadas: " + dia["Longitud"] + ", " + dia["Latitud"])
-                                print("Se registraron " + dia["Precipitaciones"] + " milimetros de lluvia.\n")
-        
-        elif menu == "4":         
-            for año in range(5):
-                
-                maxTemp = max(dataPorAño[0][año])                
-                
-                añoLlave = str(año)+" años"
-                añoDato = AÑO_CORRIENTE - año
-                
-                if len(data[añoLlave]) == 0:
-                    print(f'No hay datos del año {str(añoDato)}\n')
-                
-                else:
-                    for dia in data[añoLlave]:
-                        if float(dia['Max t']) == maxTemp:
-                            print("El dia " + dia["Fecha"] + " en las coordenadas: " + dia["Longitud"] + ", " + dia["Latitud"])
-                            print("Se registraron " + dia["Max t"] + " grados centigrados.\n")
+                                print("Se registraron " + dia["Max t"] + " grados centigrados.\n")
 
-        elif menu == "5":
-            bandera = False
+            elif menu == "5":
+                bandera = False
+    else:
+        print("\nE R R O R: No se pudo leer el archivo correctamente. Verifique datos.")
